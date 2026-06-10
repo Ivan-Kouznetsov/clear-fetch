@@ -1,5 +1,5 @@
 {
-  "name": "clear-fetch",
+  "name": "@ivan-kouznetsov/clear-fetch",
   "version": "0.1.0",
   "description": "A lightweight, production-safe HTTP logging wrapper for native Node.js fetch.",
   "license": "MIT",
@@ -9,6 +9,26 @@
   "engines": {
     "node": ">=22.5.0"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "fetch",
+    "http",
+    "logging",
+    "logger",
+    "sqlite",
+    "wrapper",
+    "node",
+    "request",
+    "response",
+    "debugging"
+  ],
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "node -e \"const fs=require('node:fs');fs.rmSync('dist',{recursive:true,force:true})\"",
