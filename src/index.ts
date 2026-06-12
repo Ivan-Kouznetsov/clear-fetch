@@ -1,5 +1,10 @@
 import type { ClearFetchOptions, RequestLogRecord, ResponseLogRecord } from './types.js';
-import { createRedactionKeySet, parseCallerInfo, serializeBodyForLog, serializeHeadersForLog } from './utils.js';
+import {
+  createRedactionKeySet,
+  parseCallerInfo,
+  serializeBodyForLog,
+  serializeHeadersForLog,
+} from './utils.js';
 import { createRandomRequestId, openClearFetchDatabase } from './db.js';
 import { join } from 'node:path';
 
@@ -15,7 +20,10 @@ export function createClearFetch(options: ClearFetchOptions = {}): typeof fetch 
   const database = openClearFetchDatabase(mergedOptions.databasePath);
   const redactionKeys = createRedactionKeySet(mergedOptions.redactionKeys);
 
-  const wrappedFetch: typeof fetch = async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+  const wrappedFetch: typeof fetch = async (
+    input: Parameters<typeof fetch>[0],
+    init?: Parameters<typeof fetch>[1],
+  ) => {
     const startedAt = Date.now();
     const requestId = createRandomRequestId();
     const callerInfo = parseCallerInfo(wrappedFetch);
@@ -25,7 +33,11 @@ export function createClearFetch(options: ClearFetchOptions = {}): typeof fetch 
     const requestClone = request.clone();
 
     const requestContentType = request.headers.get('content-type');
-    const requestBody = await serializeBodyForLog(requestContentType, requestClone.body, redactionKeys);
+    const requestBody = await serializeBodyForLog(
+      requestContentType,
+      requestClone.body,
+      redactionKeys,
+    );
     const requestHeaders = serializeHeadersForLog(request.headers, redactionKeys);
     const requestUrl = new URL(request.url);
 
@@ -55,7 +67,11 @@ export function createClearFetch(options: ClearFetchOptions = {}): typeof fetch 
       const responseClone = response.clone();
       const responseContentType = response.headers.get('content-type');
       const responseHeaders = serializeHeadersForLog(response.headers, redactionKeys);
-      const responseBody = await serializeBodyForLog(responseContentType, responseClone.body, redactionKeys);
+      const responseBody = await serializeBodyForLog(
+        responseContentType,
+        responseClone.body,
+        redactionKeys,
+      );
 
       const responseRecord: ResponseLogRecord = {
         id: createRandomRequestId(),
@@ -81,7 +97,7 @@ export function createClearFetch(options: ClearFetchOptions = {}): typeof fetch 
         statusText: null,
         headers: null,
         body: null,
-        error: error instanceof Error ? error.stack ?? error.message : String(error),
+        error: error instanceof Error ? (error.stack ?? error.message) : String(error),
       };
 
       database.insertResponse(responseRecord);

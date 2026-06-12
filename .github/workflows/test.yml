@@ -2,9 +2,12 @@ name: Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   test:
@@ -22,6 +25,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run linter and style checks
+        run: npm run lint
 
       - name: Run tests
         run: npm test

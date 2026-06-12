@@ -83,9 +83,7 @@ test('normalizeHeaders', () => {
   // Case 3: set-cookie with getSetCookie returning items
   const mockHeadersWithGetSet = {
     entries() {
-      return [
-        ['set-cookie', 'session=123'],
-      ][Symbol.iterator]();
+      return [['set-cookie', 'session=123']][Symbol.iterator]();
     },
     getSetCookie() {
       return ['session=123', 'theme=dark'];
@@ -97,9 +95,7 @@ test('normalizeHeaders', () => {
   // Case 4: set-cookie with getSetCookie returning empty array
   const mockHeadersEmptyGetSet = {
     entries() {
-      return [
-        ['set-cookie', 'session=123'],
-      ][Symbol.iterator]();
+      return [['set-cookie', 'session=123']][Symbol.iterator]();
     },
     getSetCookie() {
       return [];
@@ -258,4 +254,3 @@ test('parseCallerInfo fallback and continue branches', () => {
     Error.captureStackTrace = originalCapture;
   }
 });
-

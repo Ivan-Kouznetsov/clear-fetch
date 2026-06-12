@@ -31,7 +31,11 @@ test('initGlobalClearFetch behavior', () => {
     process.env.NODE_ENV = 'development';
     process.env.DEBUG = '1';
     initGlobalClearFetch({ databasePath: ':memory:', redactionKeys: ['dummy-key'] });
-    assert.notEqual(globalThis.fetch, originalFetch, 'Should patch fetch when debug mode is enabled');
+    assert.notEqual(
+      globalThis.fetch,
+      originalFetch,
+      'Should patch fetch when debug mode is enabled',
+    );
     assert.equal(typeof globalThis.fetch, 'function', 'Patched fetch should be a function');
   } finally {
     // Restore original globals

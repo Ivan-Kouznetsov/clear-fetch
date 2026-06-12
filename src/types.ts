@@ -3,7 +3,7 @@ export interface ClearFetchOptions {
   redactionKeys?: readonly string[];
 }
 
-export interface ClearFetchBootstrapOptions extends ClearFetchOptions {}
+export type ClearFetchBootstrapOptions = ClearFetchOptions;
 
 export interface CallerInfo {
   filePath: string | null;
