@@ -1,5 +1,7 @@
 # @ivan-kouznetsov/clear-fetch
 
+[![Test Status](https://github.com/Ivan-Kouznetsov/clear-fetch/actions/workflows/test.yml/badge.svg)](https://github.com/Ivan-Kouznetsov/clear-fetch/actions/workflows/test.yml)
+
 A lightweight, production-safe HTTP logging wrapper for native Node.js `fetch`.
 
 `clear-fetch` intercepts outbound HTTP requests and inbound responses, logging them directly to a local SQLite database for easy debugging, troubleshooting, and analysis. It is designed to be completely safe for production use by remaining a hard no-op in production.
@@ -23,7 +25,7 @@ A lightweight, production-safe HTTP logging wrapper for native Node.js `fetch`.
 npm install @ivan-kouznetsov/clear-fetch
 ```
 
-*Note: Requires Node.js `>= 22.5.0`.*
+_Note: Requires Node.js `>= 22.5.0`._
 
 ---
 
@@ -34,6 +36,7 @@ npm install @ivan-kouznetsov/clear-fetch
 Use this option to create a wrapped fetch instance that you can use explicitly in your modules.
 
 #### Default Usage
+
 ```typescript
 import { createClearFetch } from '@ivan-kouznetsov/clear-fetch';
 
@@ -46,12 +49,13 @@ const data = await response.json();
 ```
 
 #### Custom Options
+
 ```typescript
 const clearFetch = createClearFetch({
   // Custom SQLite path
   databasePath: './logs/http-traffic.sqlite',
   // Extra key names in headers or JSON bodies to redact (in addition to default keys)
-  redactionKeys: ['custom-api-key']
+  redactionKeys: ['custom-api-key'],
 });
 ```
 
@@ -60,6 +64,7 @@ const clearFetch = createClearFetch({
 Use this option to globally intercept all native `fetch` calls in your application.
 
 #### Default Usage
+
 ```typescript
 import { initGlobalClearFetch } from '@ivan-kouznetsov/clear-fetch/dist/init.js';
 
@@ -71,14 +76,16 @@ const response = await fetch('https://api.example.com/data');
 ```
 
 #### Custom Options
+
 ```typescript
 initGlobalClearFetch({
   databasePath: './logs/global-http.sqlite',
-  redactionKeys: ['custom-api-key']
+  redactionKeys: ['custom-api-key'],
 });
 ```
 
 To run your app with global logging enabled:
+
 ```bash
 DEBUG=1 node app.js
 ```
@@ -88,17 +95,22 @@ DEBUG=1 node app.js
 ## Configuration & Defaults
 
 ### Database Path
+
 By default, logs are written to:
 `[project-root]/.clear-fetch/clear-fetch.sqlite`
 
 You can customize this path by specifying `databasePath` when calling `createClearFetch` or `initGlobalClearFetch`.
 
+> [!TIP]
+> You can easily view, query, and analyze your logged HTTP traffic by opening the SQLite database using **[DB Browser for SQLite](https://sqlitebrowser.org/)**, a free, open-source visual tool.
+
 ### Default Redaction Keys
+
 To ensure that credentials, cookies, and tokens are never written to disk by default, the library includes a built-in list of redaction keys that are automatically applied case-insensitively to both HTTP headers and JSON bodies:
 
-*   **Credentials & Auth**: `authorization`, `proxy-authorization`, `authentication`, `auth`, `auth_token`, `access_token`, `refresh_token`, `id_token`, `jwt`, `bearer`
-*   **Cookies & Sessions**: `cookie`, `set-cookie`, `session`, `sessionid`, `session_id`
-*   **API Keys & Secrets**: `token`, `secret`, `password`, `x-api-key`, `api-key`, `x-auth-token`, `x-access-token`, `x-csrf-token`, `x-xsrf-token`, `csrf`, `csrf_token`, `xsrf`, `xsrf_token`
+- **Credentials & Auth**: `authorization`, `proxy-authorization`, `authentication`, `auth`, `auth_token`, `access_token`, `refresh_token`, `id_token`, `jwt`, `bearer`
+- **Cookies & Sessions**: `cookie`, `set-cookie`, `session`, `sessionid`, `session_id`
+- **API Keys & Secrets**: `token`, `secret`, `password`, `x-api-key`, `api-key`, `x-auth-token`, `x-access-token`, `x-csrf-token`, `x-xsrf-token`, `csrf`, `csrf_token`, `xsrf`, `xsrf_token`
 
 When you provide custom `redactionKeys` in the options, they are **merged with** (appended to) this default set. You do not need to re-specify these default keys.
 
@@ -109,6 +121,7 @@ When you provide custom `redactionKeys` in the options, they are **merged with**
 Logs are saved to `requests` and `responses` tables in the SQLite database.
 
 ### `requests` Table
+
 - `id` (TEXT, PK): Unique request ID.
 - `timestamp` (TEXT): ISO 8601 timestamp.
 - `method` (TEXT): HTTP verb (GET, POST, etc.).
@@ -124,6 +137,7 @@ Logs are saved to `requests` and `responses` tables in the SQLite database.
 - `callerFunction` (TEXT): Name of the function that initiated the fetch.
 
 ### `responses` Table
+
 - `id` (TEXT, PK): Unique response ID.
 - `requestId` (TEXT, FK): Matches the `requests.id`.
 - `timestamp` (TEXT): ISO 8601 timestamp.

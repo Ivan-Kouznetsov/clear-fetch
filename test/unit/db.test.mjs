@@ -5,10 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-import {
-  openClearFetchDatabase,
-  createRandomRequestId,
-} from '../../dist/db.js';
+import { openClearFetchDatabase, createRandomRequestId } from '../../dist/db.js';
 
 function getTempDir() {
   return mkdtempSync(join(tmpdir(), 'clear-fetch-db-test-'));
@@ -63,13 +60,17 @@ test('openClearFetchDatabase with custom path', () => {
 
     // Verify insertion using SQLite directly
     const database = new DatabaseSync(dbPath, { readOnly: true });
-    const reqRow = database.prepare('SELECT * FROM requests WHERE id = $id').get({ $id: requestId });
+    const reqRow = database
+      .prepare('SELECT * FROM requests WHERE id = $id')
+      .get({ $id: requestId });
     assert.ok(reqRow);
     assert.equal(reqRow.method, 'GET');
     assert.equal(reqRow.caller_file, 'file.js');
     assert.equal(reqRow.caller_line, 42);
 
-    const resRow = database.prepare('SELECT * FROM responses WHERE request_id = $id').get({ $id: requestId });
+    const resRow = database
+      .prepare('SELECT * FROM responses WHERE request_id = $id')
+      .get({ $id: requestId });
     assert.ok(resRow);
     assert.equal(resRow.status, 200);
     assert.equal(resRow.body, 'response body');

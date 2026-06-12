@@ -66,6 +66,7 @@ export function redactDeep<T>(value: T, keys: Set<string> = defaultRedactionKeys
   return value;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function parseCallerInfo(skipFn: Function): CallerInfo {
   const originalPrepareStackTrace = Error.prepareStackTrace;
 
@@ -154,7 +155,9 @@ export async function readStreamAsText(stream: ReadableStream<Uint8Array> | null
   return Buffer.concat(chunks).toString('utf8');
 }
 
-export async function hashReadableStream(stream: ReadableStream<Uint8Array> | null): Promise<string> {
+export async function hashReadableStream(
+  stream: ReadableStream<Uint8Array> | null,
+): Promise<string> {
   const hash = createHash('sha256');
 
   if (!stream) {

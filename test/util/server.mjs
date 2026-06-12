@@ -28,7 +28,7 @@ export function mockServerHandler(req, res) {
     res.end(JSON.stringify([{ id: 1, title: 'stub-title' }]));
     return;
   }
-  
+
   if (pathname === '/posts/1') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ id: 1, title: 'stub-title' }));

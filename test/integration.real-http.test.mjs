@@ -22,7 +22,6 @@ after(async () => {
   }
 });
 
-
 function createTempDatabasePath(testName) {
   const dir = mkdtempSync(join(tmpdir(), 'clear-fetch-test-'));
   const safeName = testName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -169,7 +168,8 @@ test('GET /delay/3 with timeout abort', async () => {
         headers: {
           Authorization: 'Bearer should-not-appear',
           'X-Api-Key': 'top-secret-api-key',
-          Cookie: 'sessionid=abc123; jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.1234567890.abcdefghijk',
+          Cookie:
+            'sessionid=abc123; jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.1234567890.abcdefghijk',
         },
       }),
     (error) => {
@@ -213,7 +213,9 @@ test('createClearFetch defaults and option parsing', async () => {
     if (existsSync(defaultPath)) {
       rmSync(defaultPath, { force: true });
     }
-  } catch { }
+  } catch {
+    // Ignore errors during cleanup
+  }
 
   const clearFetch = createClearFetch();
 
@@ -225,9 +227,9 @@ test('createClearFetch defaults and option parsing', async () => {
   try {
     const response = await clearFetch(server.url, {
       headers: {
-        'Authorization': 'Bearer test-token',
-        'X-Normal-Header': 'normal-value'
-      }
+        Authorization: 'Bearer test-token',
+        'X-Normal-Header': 'normal-value',
+      },
     });
     assert.equal(response.status, 200);
     assert.equal(await response.text(), 'ok');
@@ -246,15 +248,17 @@ test('createClearFetch with custom redaction keys and headers/body redaction', a
   const databasePath = createTempDatabasePath('custom-redaction');
   const clearFetch = createClearFetch({
     databasePath,
-    redactionKeys: ['X-Custom-Secret', 'sensitiveField']
+    redactionKeys: ['X-Custom-Secret', 'sensitiveField'],
   });
 
   const server = await startLocalServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      safeField: 'safe-response',
-      sensitiveField: 'secret-response'
-    }));
+    res.end(
+      JSON.stringify({
+        safeField: 'safe-response',
+        sensitiveField: 'secret-response',
+      }),
+    );
   });
 
   try {
@@ -263,12 +267,12 @@ test('createClearFetch with custom redaction keys and headers/body redaction', a
       headers: {
         'Content-Type': 'application/json',
         'X-Custom-Secret': 'my-custom-secret-value',
-        'X-Safe-Header': 'safe-header-value'
+        'X-Safe-Header': 'safe-header-value',
       },
       body: JSON.stringify({
         safeField: 'safe-request',
-        sensitiveField: 'secret-request'
-      })
+        sensitiveField: 'secret-request',
+      }),
     });
     assert.equal(response.status, 200);
     const bodyText = await response.text();
@@ -335,7 +339,7 @@ test('POST binary request body logs hashed request body', async () => {
     const response = await clearFetch(server.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/octet-stream' },
-      body: binaryData
+      body: binaryData,
     });
     assert.equal(response.status, 200);
   } finally {
@@ -355,7 +359,7 @@ test('Multiple Set-Cookie headers are normalized and redacted', async () => {
   const server = await startLocalServer((req, res) => {
     res.writeHead(200, {
       'Content-Type': 'text/plain',
-      'Set-Cookie': ['cookie1=value1; Path=/', 'cookie2=value2; Domain=example.com']
+      'Set-Cookie': ['cookie1=value1; Path=/', 'cookie2=value2; Domain=example.com'],
     });
     res.end('ok');
   });
@@ -385,7 +389,7 @@ test('Request or response with missing content-type is handled gracefully', asyn
   try {
     const response = await clearFetch(server.url, {
       method: 'POST',
-      body: 'no content type request body'
+      body: 'no content type request body',
     });
     assert.equal(response.status, 200);
     assert.equal(await response.text(), 'no content type response');
@@ -412,7 +416,7 @@ test('Invalid JSON payload falls back to raw text logging', async () => {
     const response = await clearFetch(server.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: '{"invalidJson": true,'
+      body: '{"invalidJson": true,',
     });
     assert.equal(response.status, 200);
     assert.equal(await response.text(), '{"validJson": false, "missingQuote: 123}');
@@ -438,7 +442,11 @@ test('initGlobalClearFetch bootstrap integrates and logs global fetch calls', as
     process.env.NODE_ENV = 'production';
     process.env.DEBUG = '1';
     initGlobalClearFetch({ databasePath });
-    assert.equal(globalThis.fetch, originalFetch, 'globalThis.fetch should not be patched in production');
+    assert.equal(
+      globalThis.fetch,
+      originalFetch,
+      'globalThis.fetch should not be patched in production',
+    );
 
     // Restore fetch reference
     globalThis.fetch = originalFetch;
@@ -447,7 +455,11 @@ test('initGlobalClearFetch bootstrap integrates and logs global fetch calls', as
     process.env.NODE_ENV = 'development';
     delete process.env.DEBUG;
     initGlobalClearFetch({ databasePath });
-    assert.equal(globalThis.fetch, originalFetch, 'globalThis.fetch should not be patched when DEBUG !== 1');
+    assert.equal(
+      globalThis.fetch,
+      originalFetch,
+      'globalThis.fetch should not be patched when DEBUG !== 1',
+    );
 
     // Restore fetch reference
     globalThis.fetch = originalFetch;
@@ -491,7 +503,6 @@ test('initGlobalClearFetch bootstrap integrates and logs global fetch calls', as
   }
 });
 
-
 test('openClearFetchDatabase with custom path can be closed', () => {
   const databasePath = createTempDatabasePath('db-close-test');
   const database = openClearFetchDatabase(databasePath);
@@ -516,4 +527,3 @@ test('openClearFetchDatabase with custom path can be closed', () => {
     });
   });
 });
-

@@ -1,0 +1,5 @@
+dist
+node_modules
+.clear-fetch
+.temp
+package-lock.json

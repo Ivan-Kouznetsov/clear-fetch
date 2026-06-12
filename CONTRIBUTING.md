@@ -9,23 +9,27 @@ Thank you for your interest in contributing to `clear-fetch`! We welcome bug rep
 To set up a local development environment:
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/Ivan-Kouznetsov/clear-fetch.git
    cd clear-fetch
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Build the project**:
    Compile TypeScript source files into JavaScript inside the `dist/` directory:
+
    ```bash
    npm run build
    ```
 
    You can also clean existing build artifacts before compiling:
+
    ```bash
    npm run clean
    ```
@@ -37,11 +41,13 @@ To set up a local development environment:
 We maintain strict test coverage with unit and integration test suites. Before submitting any changes, make sure all tests pass.
 
 - **Run all tests**:
+
   ```bash
   npm test
   ```
 
 - **Run unit tests only**:
+
   ```bash
   npm run test:unit
   ```
@@ -50,7 +56,7 @@ We maintain strict test coverage with unit and integration test suites. Before s
   ```bash
   npm run test:integration
   ```
-  *(Note: The integration tests run against a local test server located in `test/util/server.mjs`, ensuring tests run entirely locally without external network dependencies).*
+  _(Note: The integration tests run against a local test server located in `test/util/server.mjs`, ensuring tests run entirely locally without external network dependencies)._
 
 ---
 

@@ -19,10 +19,14 @@ function createTempDatabasePath(testName) {
 function getLatestRecord(dbPath) {
   const database = new DatabaseSync(dbPath, { readOnly: true });
   try {
-    const request = database.prepare('SELECT * FROM requests ORDER BY timestamp DESC LIMIT 1').get();
+    const request = database
+      .prepare('SELECT * FROM requests ORDER BY timestamp DESC LIMIT 1')
+      .get();
     let response = null;
     if (request) {
-      response = database.prepare('SELECT * FROM responses WHERE request_id = $id').get({ $id: request.id });
+      response = database
+        .prepare('SELECT * FROM responses WHERE request_id = $id')
+        .get({ $id: request.id });
     }
     return { request, response };
   } finally {
@@ -60,8 +64,7 @@ test('createClearFetch logs successful response', async () => {
   const { dir, dbPath } = createTempDatabasePath('success');
   const originalFetch = globalThis.fetch;
 
-  // Mock global fetch to return a JSON response
-  globalThis.fetch = async (input, init) => {
+  globalThis.fetch = async () => {
     return new Response(JSON.stringify({ data: 'hello' }), {
       status: 201,
       statusText: 'Created',
@@ -135,7 +138,7 @@ test('createClearFetch logs error details when fetch throws (Error object with s
 
     await assert.rejects(
       () => clearFetch('https://invalid-domain.local/'),
-      /DNS resolution failed/
+      /DNS resolution failed/,
     );
 
     const { request, response: loggedResponse } = getLatestRecord(dbPath);
@@ -166,10 +169,7 @@ test('createClearFetch logs error details when fetch throws (Error object withou
   try {
     const clearFetch = createClearFetch({ databasePath: dbPath });
 
-    await assert.rejects(
-      () => clearFetch('https://invalid-domain.local/'),
-      /No stack error/
-    );
+    await assert.rejects(() => clearFetch('https://invalid-domain.local/'), /No stack error/);
 
     const { request, response: loggedResponse } = getLatestRecord(dbPath);
     assert.ok(request);
@@ -198,7 +198,7 @@ test('createClearFetch logs error details when fetch throws (primitive error)', 
 
     await assert.rejects(
       () => clearFetch('https://invalid-domain.local/'),
-      /Simulated network exception/
+      /Simulated network exception/,
     );
 
     const { request, response: loggedResponse } = getLatestRecord(dbPath);
@@ -224,7 +224,9 @@ test('createClearFetch captures and logs the caller function name correctly', as
     if (existsSync(dbPath)) {
       rmSync(dbPath, { force: true });
     }
-  } catch {}
+  } catch {
+    // Ignore cleanup error
+  }
 
   globalThis.fetch = async () => new Response('ok');
 
@@ -247,4 +249,3 @@ test('createClearFetch captures and logs the caller function name correctly', as
     globalThis.fetch = originalFetch;
   }
 });
-
