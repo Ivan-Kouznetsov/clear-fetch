@@ -8,10 +8,9 @@ import {
 import { createRandomRequestId, openClearFetchDatabase } from './db.js';
 import { join } from 'node:path';
 
-const defaultDatabasePath = join(process.cwd(), '.clear-fetch', 'clear-fetch.sqlite');
-
 export function createClearFetch(options: ClearFetchOptions = {}): typeof fetch {
   const originalFetch = globalThis.fetch;
+  const defaultDatabasePath = join(process.cwd(), '.clear-fetch', 'clear-fetch.sqlite');
   const mergedOptions: Required<ClearFetchOptions> = {
     databasePath: options.databasePath ?? defaultDatabasePath,
     redactionKeys: options.redactionKeys ?? [],

@@ -38,24 +38,28 @@ test('createClearFetch defaults and option parsing', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response('ok');
 
+  const tempCwdDir = mkdtempSync(join(tmpdir(), 'clear-fetch-index-default-cwd-'));
+  const originalCwd = process.cwd();
+
   try {
+    process.chdir(tempCwdDir);
     // Test default options (especially omitted databasePath and redactionKeys)
     const clearFetch = createClearFetch();
     const response = await clearFetch('https://example.com/test');
     assert.equal(response.status, 200);
 
     // Verify it created the default database path
-    const defaultDir = join(process.cwd(), '.clear-fetch');
+    const defaultDir = join(tempCwdDir, '.clear-fetch');
     const defaultDbFile = join(defaultDir, 'clear-fetch.sqlite');
     assert.ok(existsSync(defaultDbFile));
   } finally {
     globalThis.fetch = originalFetch;
-    // Clean up default database
-    const defaultDir = join(process.cwd(), '.clear-fetch');
+    process.chdir(originalCwd);
     try {
-      rmSync(defaultDir, { recursive: true, force: true });
+      rmSync(tempCwdDir, { recursive: true, force: true });
     } catch {
-      // ignore EPERM if it's locked, it will be cleaned up eventually
+      // Ignore EPERM on Windows since the database file is kept open.
+      // It will be cleaned up when the test process exits.
     }
   }
 });
@@ -216,17 +220,8 @@ test('createClearFetch logs error details when fetch throws (primitive error)', 
 });
 
 test('createClearFetch captures and logs the caller function name correctly', async () => {
-  const dbPath = join(process.cwd(), '.clear-fetch', 'caller-function-test.sqlite');
+  const { dir, dbPath } = createTempDatabasePath('caller-function');
   const originalFetch = globalThis.fetch;
-
-  // Clean up any old DB first
-  try {
-    if (existsSync(dbPath)) {
-      rmSync(dbPath, { force: true });
-    }
-  } catch {
-    // Ignore cleanup error
-  }
 
   globalThis.fetch = async () => new Response('ok');
 
@@ -247,5 +242,10 @@ test('createClearFetch captures and logs the caller function name correctly', as
     assert.ok(request.caller_line > 0);
   } finally {
     globalThis.fetch = originalFetch;
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      // ignore
+    }
   }
 });

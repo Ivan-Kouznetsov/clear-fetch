@@ -1,6 +1,6 @@
 {
   "name": "@ivan-kouznetsov/clear-fetch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight, production-safe HTTP logging wrapper for native Node.js fetch.",
   "repository": {
     "type": "git",

@@ -7,6 +7,8 @@ import type { DatabaseHandle, RequestLogRecord, ResponseLogRecord } from './type
 
 const schema = `
 PRAGMA foreign_keys = ON;
+PRAGMA journal_mode = WAL;
+PRAGMA busy_timeout = 5000;
 
 CREATE TABLE IF NOT EXISTS requests (
   id TEXT PRIMARY KEY,
