@@ -22,7 +22,7 @@ A lightweight, production-safe HTTP logging wrapper for native Node.js `fetch`.
 ## Installation
 
 ```bash
-npm install @ivan-kouznetsov/clear-fetch
+npm install -D @ivan-kouznetsov/clear-fetch
 ```
 
 _Note: Requires Node.js `>= 22.5.0`._
