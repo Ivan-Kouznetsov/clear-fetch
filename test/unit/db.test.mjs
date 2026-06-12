@@ -84,19 +84,19 @@ test('openClearFetchDatabase with custom path', () => {
 test('openClearFetchDatabase with default path', () => {
   // We want to test the branch where no path is provided.
   // This defaults to process.cwd()/.clear-fetch/clear-fetch.sqlite
-  const defaultDir = join(process.cwd(), '.clear-fetch');
-  const defaultDbFile = join(defaultDir, 'clear-fetch.sqlite');
-
-  // Let's backup if it exists, or just ensure we clean up ours
-  const existedBefore = existsSync(defaultDbFile);
+  const tempCwdDir = mkdtempSync(join(tmpdir(), 'clear-fetch-db-default-cwd-'));
+  const originalCwd = process.cwd();
 
   try {
+    process.chdir(tempCwdDir);
+    const defaultDir = join(tempCwdDir, '.clear-fetch');
+    const defaultDbFile = join(defaultDir, 'clear-fetch.sqlite');
+
     const handle = openClearFetchDatabase();
     assert.ok(existsSync(defaultDbFile), 'Default database file should be created');
     handle.close();
   } finally {
-    if (!existedBefore) {
-      rmSync(defaultDir, { recursive: true, force: true });
-    }
+    process.chdir(originalCwd);
+    rmSync(tempCwdDir, { recursive: true, force: true });
   }
 });

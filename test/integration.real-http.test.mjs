@@ -1,6 +1,6 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, existsSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -206,16 +206,12 @@ test('GET /bytes/1024 logs hashed binary response body', async () => {
 });
 
 test('createClearFetch defaults and option parsing', async () => {
-  const defaultPath = join(process.cwd(), '.clear-fetch', 'clear-fetch.sqlite');
+  const tempCwdDir = mkdtempSync(join(tmpdir(), 'clear-fetch-integration-default-cwd-'));
+  const originalCwd = process.cwd();
 
-  // Clean up default path first if it exists
-  try {
-    if (existsSync(defaultPath)) {
-      rmSync(defaultPath, { force: true });
-    }
-  } catch {
-    // Ignore errors during cleanup
-  }
+  const defaultPath = join(tempCwdDir, '.clear-fetch', 'clear-fetch.sqlite');
+
+  process.chdir(tempCwdDir);
 
   const clearFetch = createClearFetch();
 
@@ -233,15 +229,22 @@ test('createClearFetch defaults and option parsing', async () => {
     });
     assert.equal(response.status, 200);
     assert.equal(await response.text(), 'ok');
+
+    const row = getLatestRequestAndResponse(defaultPath, 'http://127.0.0.1');
+    assert.equal(row.status, 200);
+    const headers = JSON.parse(row.request_headers);
+    assert.equal(headers.authorization, '[REDACTED]');
+    assert.equal(headers['x-normal-header'], 'normal-value');
   } finally {
     await server.close();
+    process.chdir(originalCwd);
+    try {
+      rmSync(tempCwdDir, { recursive: true, force: true });
+    } catch {
+      // Ignore EPERM on Windows since the database file is kept open.
+      // It will be cleaned up when the test process exits.
+    }
   }
-
-  const row = getLatestRequestAndResponse(defaultPath, 'http://127.0.0.1');
-  assert.equal(row.status, 200);
-  const headers = JSON.parse(row.request_headers);
-  assert.equal(headers.authorization, '[REDACTED]');
-  assert.equal(headers['x-normal-header'], 'normal-value');
 });
 
 test('createClearFetch with custom redaction keys and headers/body redaction', async () => {
